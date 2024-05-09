@@ -399,7 +399,9 @@ class PPO_RLPlayer(Gen8EnvSinglePlayer):
             number_of_pokemons: int = 6,
             starting_value: float = 0.0,
             status_value: float = 0.15,
-            victory_value: float = 1.0
+            victory_value: float = 1.0,
+            effective_move_value: float = 0.1,
+            super_effective_move_value: float = 0.2
     ) -> float:
         # 1st compute
         if battle not in self._reward_buffer:
@@ -426,6 +428,18 @@ class PPO_RLPlayer(Gen8EnvSinglePlayer):
 
         current_value -= (number_of_pokemons - len(battle.opponent_team)) * hp_value
 
+        # Verify if the last used move was effective or super effective
+        if battle.last_used_move:
+            if battle.last_used_move.type:
+                multiplier = battle.last_used_move.type.damage_multiplier(
+                    battle.opponent_active_pokemon.type_1,
+                    battle.opponent_active_pokemon.type_2,
+                )
+                if multiplier > 1:
+                    current_value += super_effective_move_value
+                elif multiplier == 1:
+                    current_value += effective_move_value
+
         # Verify if we won or lost
         if battle.won:
             current_value += victory_value
@@ -435,9 +449,7 @@ class PPO_RLPlayer(Gen8EnvSinglePlayer):
         # Value to return
         to_return = current_value - self._reward_buffer[battle]
         self._reward_buffer[battle] = current_value
-        if args.neptune:
-            run[f'{self.mode} reward_buffer'].log(current_value)
-        else: rewards_a.append(current_value)
+        rewards_a.append(current_value)
         return to_return
 
     # Calling reward_computing_helper
@@ -540,14 +552,27 @@ if __name__ == "__main__":
         model.save("model_%d" % NB_TRAINING_STEPS)
 
     if not args.neptune:
-        plt.figure(figsize=(25,20))
+        plt.figure(figsize=(25, 20))
         fig, ax1 = plt.subplots(figsize=(25, 20))
-        ax1.plot(rewards_a, 'b:') #color=color
-        plt.savefig('rewards.pdf')  
+        ax1.plot(rewards_a, 'b:')  # color=color
+        plt.xlabel('Episode')
+        plt.ylabel('Reward')
+        plt.title('Reward per Episode')
+        plt.savefig('rewards.pdf')
 
         fig, ax1 = plt.subplots(figsize=(25, 20))
-        ax1.plot(win_a, 'r') #color=color
-        plt.savefig('win.pdf')  
+        ax1.plot(win_a, 'r')  # color=color
+        plt.xlabel('Episode')
+        plt.ylabel('Win Accuracy')
+        plt.title('Win Accuracy per Episode')
+        plt.savefig('win.pdf')
+
+        # Log additional metrics
+        avg_reward = sum(rewards_a) / len(rewards_a)
+        print(f"Average Reward: {avg_reward:.2f}")
+
+        avg_win_acc = sum(win_a) / len(win_a)
+        print(f"Average Win Accuracy: {avg_win_acc:.2f}")
 
     env_player.mode = "val_max"
 
