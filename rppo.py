@@ -15,7 +15,7 @@ from poke_env.player.random_player import RandomPlayer
 from poke_env.environment.abstract_battle import AbstractBattle
 from poke_env.player.battle_order import ForfeitBattleOrder
 
-from stable_baselines3 import TD3
+from sb3_contrib import RecurrentPPO as RPPO
 from gym.spaces import Box, Discrete
 
 from distutils.util import strtobool
@@ -343,13 +343,13 @@ def parse_args():
 np.random.seed(0)
 
 # Definition of PPO player
-class TD3_RLPlayer(Gen8EnvSinglePlayer):
+class RPPORLPlayer(Gen8EnvSinglePlayer):
     def __init__(self, battle_format, team, mode):
             super().__init__(battle_format=battle_format, team=team)
             self.mode = mode 
             self.num_battles = 0
-            self.observation_space = Box(low=-np.inf, high=np.inf, shape=(12,))
-            self._ACTION_SPACE = Box(low=-1, high=1, shape=(9,))
+            self.observation_space = Box(low=-10, high=10, shape=(12,))
+            self._ACTION_SPACE = Discrete(9)
 
     def getThisPlayer(self):
         return self
@@ -494,8 +494,8 @@ if __name__ == "__main__":
     ALL_OUR_ACTIONS = np.array(range(0, N_OUR_ACTIONS))
 
     if args.train:
-        env_player = TD3_RLPlayer(battle_format="gen8ou", team=OUR_TEAM, mode = "train")
-    else: env_player = TD3_RLPlayer(battle_format="gen8ou", team=OUR_TEAM, mode = "val")
+        env_player = RPPORLPlayer(battle_format="gen8ou", team=OUR_TEAM, mode = "train")
+    else: env_player = RPPORLPlayer(battle_format="gen8ou", team=OUR_TEAM, mode = "val")
 
     second_opponent = RandomPlayer(battle_format="gen8ou", team=OP_TEAM)
     opponent= MaxDamagePlayer(battle_format="gen8ou", team=OP_TEAM)
@@ -504,17 +504,17 @@ if __name__ == "__main__":
     if args.saved: 
         modelfolder = args.model_folder
     else: 
-        model = TD3("MlpPolicy", env_player, gamma=args.gamma, verbose=0)
+        model = RPPO("MlpLstmPolicy", env_player, gamma=args.gamma, verbose=0)
 
 # Train
-    def TD3_training(player):
+    def RPPOtraining(player):
 
         print ("Training...")
         model.learn(total_timesteps=NB_TRAINING_STEPS)
         print("Training complete.")
 
 # Validation
-    def TD3_evaluating(player):
+    def RPPOevaluating(player):
         player.reset_battles()
         for _ in range(NB_EVALUATION_EPISODES):
             done = False
@@ -533,7 +533,7 @@ if __name__ == "__main__":
     if args.train:
         # Training
         env_player.play_against(
-            env_algorithm=TD3_training,
+            env_algorithm=RPPOtraining,
             opponent=opponent
         )
         model.save("model_%d" % NB_TRAINING_STEPS)
@@ -567,13 +567,13 @@ if __name__ == "__main__":
     print("Results against max player:")
     env_player.num_battles=0
     env_player.play_against(
-        env_algorithm=TD3_evaluating,
+        env_algorithm=RPPOevaluating,
         opponent=opponent)
     env_player.mode = "val_rand"
     print("\nResults against random player:")
     env_player.num_battles=0
     env_player.play_against(
-        env_algorithm=TD3_evaluating,
+        env_algorithm=RPPOevaluating,
         opponent=second_opponent)
 
 
