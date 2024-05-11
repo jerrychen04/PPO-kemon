@@ -552,6 +552,7 @@ if __name__ == "__main__":
         plt.xlabel('Episode')
         plt.ylabel('Win Accuracy')
         plt.title('Win Accuracy per Episode')
+        plt.savefig('win.png')
         plt.savefig('win.pdf')
 
         # Log additional metrics
