@@ -1,6 +1,6 @@
-# PPokemon Showdown
+# PPO-kemon Showdown
 
-# To run a server
+## Host Local Pokemon Showdown Server
 - Install Node.js v10+.
 
 Clone the Pokémon Showdown repository and set it up:
@@ -11,16 +11,19 @@ Clone the Pokémon Showdown repository and set it up:
 - cp config/config-example.js config/config.js
 - node pokemon-showdown start --no-security
 
-# To run sample RL code
+## Train & Evaluate RL Models
 - Install anaconda3 and add to PATH
 - Link is here: https://www.geeksforgeeks.org/how-to-setup-anaconda-path-to-environment-variable/
 - Create a conda env and install poke-env==0.4.21 
 - Install all other dependencies needed (will add requirements.txt later)
 - Run python [model_name].py to train the model
 
-Sample code from this repo: https://github.com/leolellisr/poke_RL
+Base code from this repo: https://github.com/leolellisr/poke_RL
+
 Environment: https://github.com/hsahovic/poke-env
 
+![
+](image.png)
 ```
 @misc{poke_env,
     author       = {Haris Sahovic},

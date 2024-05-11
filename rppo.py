@@ -549,7 +549,7 @@ if __name__ == "__main__":
 
         fig, ax1 = plt.subplots(figsize=(25, 20))
         ax1.plot(win_a, 'r')  # color=color
-        plt.xlabel('Episode')
+        plt.xlabel('Episode', size=20)
         plt.ylabel('Win Accuracy')
         plt.title('Win Accuracy per Episode')
         plt.savefig('win.png')
