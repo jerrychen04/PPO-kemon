@@ -1,0 +1,12 @@
+Training...
+Training complete.
+Average Reward: 1.48
+Average Win Accuracy: 0.65
+Results against max player:
+2024-05-10 18:50:11,764 - MaxDamagePlayer 1 - CRITICAL - Unexpected error message: ['', 'error', "[Invalid choice] Can't do anything: The game is over"]
+DQN Evaluation: 2875 victories out of 3333 episodes
+2024-05-10 18:55:31,038 - MaxDamagePlayer 1 - CRITICAL - Unexpected error message: ['', 'error', "[Invalid choice] Can't do anything: The game is over"]
+
+Results against random player:
+DQN Evaluation: 3330 victories out of 3333 episodes
+2024-05-10 19:03:34,945 - RandomPlayer 1 - CRITICAL - Unexpected error message: ['', 'error', "[Invalid choice] Can't do anything: The game is over"]
